@@ -1,126 +1,52 @@
+-- Verificar se o dispositivo é mobile
 local isMobile = game:GetService("UserInputService").TouchEnabled
 if not isMobile then
     return -- Se não for mobile, o script não roda
 end
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Rayfield/main/source"))()
+-- Função para criar a interface
+local function CreateWindow()
+    local Window = Instance.new("ScreenGui")
+    Window.Name = "DraxHub"
 
-local Window = Rayfield:CreateWindow({
-    Name = "DraxHub | Dead Rails",
-    LoadingTitle = "Iniciando DraxHub...",
-    ConfigurationSaving = {
-        Enabled = false
-    },
-    KeySystem = false,
-    Size = Vector2.new(400, 600)
-})
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 400, 0, 600)
+    frame.Position = UDim2.new(0.5, -200, 0.5, -300)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    frame.Parent = Window
 
-local Hub = Window:CreateTab("DraxHub", 4483362458)
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 40)
+    title.Text = "DraxHub | Dead Rails"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    title.Parent = frame
 
-Hub:CreateSection("Teleportes")
-
-local teleports = {
-   ["TP to End"] = Vector3.new(9999, 100, 9999),
-   ["TP to Castle"] = Vector3.new(100, 100, 100),
-   ["TP to TeslaLab"] = Vector3.new(200, 100, 200),
-   ["TP to Sterling"] = Vector3.new(300, 100, 300),
-   ["TP to Fort"] = Vector3.new(400, 100, 400),
-   ["TP to Train"] = Vector3.new(0, 100, 0)
-}
-
-for name, pos in pairs(teleports) do
-   Hub:CreateButton({
-      Name = name,
-      Callback = function()
-         local char = game.Players.LocalPlayer.Character
-         if char then char:MoveTo(pos) end
-      end
-   })
+    Window.Parent = game.Players.LocalPlayer.PlayerGui
 end
 
-Hub:CreateSection("Auras & Coleta")
+-- Criar a interface quando o script for executado
+CreateWindow()
 
-Hub:CreateToggle({
-   Name = "Gun Aura (Kill Mobs)",
-   CurrentValue = false,
-   Callback = function(Value)
-      getgenv().GunAura = Value
-      while getgenv().GunAura do
-         for _, mob in pairs(workspace:GetDescendants()) do
-            if mob.Name == "Mob" and mob:FindFirstChild("Humanoid") then
-               mob.Humanoid.Health = 0
-            end
-         end
-         task.wait(1)
-      end
-   end
-})
+-- Criar uma funcionalidade simples para o Teleporte
+local function CreateTeleportButton(name, position)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 200, 0, 50)
+    button.Position = UDim2.new(0.5, -100, 0.5, 50)
+    button.Text = name
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    button.Parent = game.Players.LocalPlayer.PlayerGui.DraxHub.Frame
 
-Hub:CreateButton({
-   Name = "Collect Bond & Ammo",
-   Callback = function()
-      for _,v in pairs(workspace:GetDescendants()) do
-         if v:IsA("TouchTransmitter") and v.Parent then
-            pcall(function()
-               firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 0)
-               firetouchinterest(game.Players.LocalPlayer.Character.HumanoidRootPart, v.Parent, 1)
-            end)
-         end
-      end
-   end
-})
+    button.MouseButton1Click:Connect(function()
+        local char = game.Players.LocalPlayer.Character
+        if char then
+            char:MoveTo(position)
+        end
+    end)
+end
 
-Hub:CreateSection("Visual")
-
-Hub:CreateToggle({
-   Name = "Items ESP",
-   CurrentValue = false,
-   Callback = function(v) end
-})
-
-Hub:CreateToggle({
-   Name = "Mobs ESP",
-   CurrentValue = false,
-   Callback = function(v) end
-})
-
-Hub:CreateButton({
-   Name = "UnlockCam",
-   Callback = function()
-      game.Players.LocalPlayer.CameraMaxZoomDistance = 1000
-   end
-})
-
-Hub:CreateButton({
-   Name = "FullBright",
-   Callback = function()
-      local light = game:GetService("Lighting")
-      light.Brightness = 2
-      light.ClockTime = 14
-      light.FogEnd = 100000
-      light.GlobalShadows = false
-   end
-})
-
-Hub:CreateSection("Modificadores")
-
-Hub:CreateButton({
-   Name = "Inf Jump",
-   Callback = function()
-      local UIS = game:GetService("UserInputService")
-      UIS.JumpRequest:Connect(function()
-         game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-      end)
-   end
-})
-
-Hub:CreateToggle({
-   Name = "Walk Speed",
-   CurrentValue = false,
-   Callback = function(v)
-      local h = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-      if h then
-         h.WalkSpeed = v and 50 or 16
-      end
-   end
-})
+-- Adicionar botões de teleporte
+CreateTeleportButton("TP to End", Vector3.new(9999, 100, 9999))
+CreateTeleportButton("TP to Castle", Vector3.new(100, 100, 100))
+CreateTeleportButton("TP to TeslaLab", Vector3.new(200, 100, 200))
