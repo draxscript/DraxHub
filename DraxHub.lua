@@ -8,16 +8,40 @@ end
 local function CreateWindow()
     local Window = Instance.new("ScreenGui")
     Window.Name = "DraxHub"
-    Window.Parent = game.Players.LocalPlayer.PlayerGui
 
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(0, 400, 0, 600)
     frame.Position = UDim2.new(0.5, -200, 0.5, -300)
     frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     frame.Parent = Window
-    frame.AnchorPoint = Vector2.new(0.5, 0.5)
 
-    -- Criando o título
+    -- Função para mover a janela
+    local dragging = false
+    local dragStartPos = nil
+    local framePos = nil
+
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStartPos = input.Position
+            framePos = frame.Position
+        end
+    end)
+
+    frame.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStartPos
+            frame.Position = UDim2.new(framePos.X.Scale, framePos.X.Offset + delta.X, framePos.Y.Scale, framePos.Y.Offset + delta.Y)
+        end
+    end)
+
+    frame.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    -- Título da janela
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, 0, 0, 40)
     title.Text = "DraxHub | Dead Rails"
@@ -25,80 +49,53 @@ local function CreateWindow()
     title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     title.Parent = frame
 
-    -- Função para arrastar a janela
-    local dragging = false
-    local dragInput, dragStart, startPos
-
-    title.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = frame.Position
-        end
-    end)
-
-    title.InputChanged:Connect(function(input)
-        if dragging then
-            local delta = input.Position - dragStart
-            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-
-    title.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-
     -- Botão de minimizar
     local minimizeButton = Instance.new("TextButton")
-    minimizeButton.Size = UDim2.new(0, 40, 0, 40)
-    minimizeButton.Position = UDim2.new(1, -40, 0, 0)
-    minimizeButton.Text = "_"
+    minimizeButton.Size = UDim2.new(0, 100, 0, 30)
+    minimizeButton.Position = UDim2.new(1, -100, 0, 10)
+    minimizeButton.Text = "Minimizar"
     minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     minimizeButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     minimizeButton.Parent = frame
 
-    -- Função de minimizar
-    local isMinimized = false
+    -- Ação de minimizar a janela
     minimizeButton.MouseButton1Click:Connect(function()
-        if isMinimized then
-            frame.Size = UDim2.new(0, 400, 0, 600)
-            isMinimized = false
-        else
-            frame.Size = UDim2.new(0, 400, 0, 40)
-            isMinimized = true
-        end
+        frame.Visible = not frame.Visible
     end)
 
-    return frame
+    -- Criar uma barra de opções para o menu
+    local optionFrame = Instance.new("Frame")
+    optionFrame.Size = UDim2.new(1, 0, 0, 50)
+    optionFrame.Position = UDim2.new(0, 0, 0, 40)
+    optionFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    optionFrame.Parent = frame
+
+    -- Adicionar as opções de funções ao menu
+    local function CreateOptionButton(name, position)
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(0, 200, 0, 50)
+        button.Position = position
+        button.Text = name
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        button.Parent = optionFrame
+
+        button.MouseButton1Click:Connect(function()
+            local char = game.Players.LocalPlayer.Character
+            if char then
+                char:MoveTo(position)
+            end
+        end)
+    end
+
+    -- Adicionar botões de teleporte
+    CreateOptionButton("TP to End", Vector3.new(9999, 100, 9999))
+    CreateOptionButton("TP to Castle", Vector3.new(100, 100, 100))
+    CreateOptionButton("TP to TeslaLab", Vector3.new(200, 100, 200))
+
+    -- Mostrar a janela no PlayerGui
+    Window.Parent = game.Players.LocalPlayer.PlayerGui
 end
 
 -- Criar a interface quando o script for executado
-local frame = CreateWindow()
-
--- Função para criar os botões de teleporte
-local function CreateTeleportButton(name, position)
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 200, 0, 50)
-    button.Position = UDim2.new(0.5, -100, 0.5, 50)  -- Ajustei a posição para que os botões não sobreponham
-    button.Text = name
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    button.Parent = frame
-
-    button.MouseButton1Click:Connect(function()
-        local char = game.Players.LocalPlayer.Character
-        if char then
-            char:MoveTo(position)
-        end
-    end)
-end
-
--- Adicionar botões de teleporte
-CreateTeleportButton("TP to End", Vector3.new(9999, 100, 9999))
-CreateTeleportButton("TP to Castle", Vector3.new(100, 100, 100))
-CreateTeleportButton("TP to TeslaLab", Vector3.new(200, 100, 200))
-CreateTeleportButton("TP to Sterling", Vector3.new(300, 100, 300))
-CreateTeleportButton("TP to Fort", Vector3.new(400, 100, 400))
-CreateTeleportButton("TP to Train", Vector3.new(0, 100, 0))
+CreateWindow()
