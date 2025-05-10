@@ -3,7 +3,7 @@ if not isMobile then
     return -- Se não for mobile, o script não roda
 end
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Rayfield/main/source"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Rayfield/main/source"))()
 
 local Window = Rayfield:CreateWindow({
     Name = "DraxHub | Dead Rails",
